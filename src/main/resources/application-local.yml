@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: brownie-ai-agent
+  ai:
+    dashscope:
+      api-key: sk-ws-H.RYEXMEH.Wsrm.MEUCIQC7ixxzkkZVyIVoCptZTRUhDUts0HCAkK-Ra8Uuvp05-AIgFraFg9RU7A0AgCtgO8p9gX0n9_cMvVh_3k9pF7GvCp0
+      chat:
+        options:
+          model: qwen-plus
