@@ -2,7 +2,7 @@ package com.brownie.brownieaiagent.app;
 
 import com.brownie.brownieaiagent.advisor.MyLoggerAdvisor;
 import com.brownie.brownieaiagent.advisor.ReReadingAdvisor;
-import com.brownie.brownieaiagent.chatmemory.FileBaseChatMemory;
+import com.brownie.brownieaiagent.chatmemory.FileBaseChatMemoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -34,12 +34,26 @@ public class LoveApp {
      * @param dashScopeChatModel
      */
     public LoveApp(ChatModel dashScopeChatModel) {
-        // 1. 创建内存存储库
-        InMemoryChatMemoryRepository repository = new InMemoryChatMemoryRepository();
+
+        // ================================================================
+        // 记忆存储实现（学习用：两种实现都保留，切换时注释/反注释即可）
+        //
+        // 方案一：内存版 —— 程序重启后历史记录丢失
+        // 方案二：文件版 —— 历史记录序列化到磁盘，重启后仍然保留
+        // ================================================================
+
+        // ---- 方案一：基于内存的存储（当前注释掉） ----
+        // ChatMemoryRepository repository = new InMemoryChatMemoryRepository();
+
+        // ---- 方案二：基于本地文件的存储（当前启用） ----
+        String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
+        ChatMemoryRepository repository = new FileBaseChatMemoryRepository(fileDir);
 
         // 2. 构建 ChatMemory 实例 (滑动窗口策略)
+        // maxMessages：只保留最近 N 条消息，等价于旧版 ChatMemory.get(id, lastN) 里的 lastN
         ChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(repository)
+                // .maxMessages(20)   // 如需限制窗口大小，取消注释并填数字
                 .build();
 
         // 3. 构建记忆增强顾问
