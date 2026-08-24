@@ -24,3 +24,7 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+#指定某一个类的输出级别，比如现在的SimpleLoggerAdvisor可以输出>=debug级别的日志
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.org.springframework.ai.chat.client.advisor.MyLoggerAdvisor: debug

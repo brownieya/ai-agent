@@ -1,14 +1,22 @@
 package com.brownie.brownieaiagent.app;
 
+import com.brownie.brownieaiagent.advisor.MyLoggerAdvisor;
+import com.brownie.brownieaiagent.advisor.ReReadingAdvisor;
+import com.brownie.brownieaiagent.chatmemory.FileBaseChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -37,10 +45,22 @@ public class LoveApp {
         // 3. 构建记忆增强顾问
         MessageChatMemoryAdvisor advisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
 
+        //官方日志（debug级别的输出，需要额外加配置）
+        //SimpleLoggerAdvisor loggerAdvisor = new SimpleLoggerAdvisor();
+
+        //自定义日志
+        MyLoggerAdvisor loggerAdvisor = new MyLoggerAdvisor();
+
+        //自定义推理增强Advisor，可按需开启
+        ReReadingAdvisor reReadingAdvisor = new ReReadingAdvisor();
+
         // 4. 构建 ChatClient
         this.chatClient = ChatClient.builder(dashScopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
-                .defaultAdvisors(advisor) // 关键：启用记忆
+                .defaultAdvisors(
+                        advisor,loggerAdvisor
+                        //,advisor,reReadingAdvisor
+                ) // 关键：启用记忆
                 .build();
     }
 
@@ -61,5 +81,25 @@ public class LoveApp {
         String content = chatResponse.getResult().getOutput().getText(); //chatResponse.getMetadata() 可以获取token消耗量等信息
         log.info("content: {}",content);
         return content;
+    }
+
+    record LoveReport(String title, List<String> suggestions){}
+
+    /**
+     * AI 恋爱报告功能（实现结构化输出）
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public LoveReport doChatWithReport(String message,String chatId) {
+        LoveReport loveReport = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId) //取当前id的上下文
+                        .param("TOP_K", 10)) //取对应的条数
+                .call()
+                .entity(LoveReport.class);
+        log.info("loveReport: {}",loveReport);
+        return loveReport;
     }
 }
