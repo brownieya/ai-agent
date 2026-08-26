@@ -10,6 +10,7 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
@@ -125,13 +126,17 @@ public class LoveApp {
     @Resource
     private VectorStore loveAppVectorStore;
 
+    @Resource
+    private Advisor loveAppRagCloudAdvisorConfig;
+
     public String doCHatWithRag(String message,String chatId) {
         ChatResponse chatResponse = chatClient
                 .prompt()
                 .user(message)
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId) //取当前id的上下文
                         .param("TOP_K", 10)) //取对应的条数
-                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore)) //应用RAG知识库问答
+                //.advisors(new QuestionAnswerAdvisor(loveAppVectorStore)) //应用RAG知识库问答
+                .advisors(loveAppRagCloudAdvisorConfig) //应用增强检索服务（云知识库服务）
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText(); //chatResponse.getMetadata() 可以获取token消耗量等信息
