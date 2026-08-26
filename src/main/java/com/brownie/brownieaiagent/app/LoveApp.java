@@ -3,10 +3,12 @@ package com.brownie.brownieaiagent.app;
 import com.brownie.brownieaiagent.advisor.MyLoggerAdvisor;
 import com.brownie.brownieaiagent.advisor.ReReadingAdvisor;
 import com.brownie.brownieaiagent.chatmemory.FileBaseChatMemoryRepository;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 
+import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.ChatMemoryRepository;
@@ -14,6 +16,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -115,5 +118,24 @@ public class LoveApp {
                 .entity(LoveReport.class);
         log.info("loveReport: {}",loveReport);
         return loveReport;
+    }
+
+    //知识库问答功能
+
+    @Resource
+    private VectorStore loveAppVectorStore;
+
+    public String doCHatWithRag(String message,String chatId) {
+        ChatResponse chatResponse = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId) //取当前id的上下文
+                        .param("TOP_K", 10)) //取对应的条数
+                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore)) //应用RAG知识库问答
+                .call()
+                .chatResponse();
+        String content = chatResponse.getResult().getOutput().getText(); //chatResponse.getMetadata() 可以获取token消耗量等信息
+        log.info("content: {}",content);
+        return content;
     }
 }

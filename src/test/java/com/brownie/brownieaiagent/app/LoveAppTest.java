@@ -39,4 +39,13 @@ class LoveAppTest {
         String message = "你好，我是程序员布朗尼,我想让另一半更喜欢我，但我不知道该怎么做";
         LoveApp.LoveReport answer = loveApp.doChatWithReport(message,chatID);
     }
+
+    @Test
+    void doCHatWithRag() {
+        String chatID = UUID.randomUUID().toString();
+        //第一轮
+        String message = "我已经结婚了，但是婚后关系不太亲密，怎么办？";
+        String answer = loveApp.doCHatWithRag(message,chatID);
+        Assertions.assertNotNull(answer);
+    }
 }
