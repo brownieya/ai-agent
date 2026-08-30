@@ -127,7 +127,7 @@ public class LoveApp {
     private VectorStore loveAppVectorStore;
 
     @Resource
-    private Advisor loveAppRagCloudAdvisorConfig;
+    private Advisor loveAppRagCloudAdvisor;
 
     public String doCHatWithRag(String message,String chatId) {
         ChatResponse chatResponse = chatClient
@@ -136,7 +136,7 @@ public class LoveApp {
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId) //取当前id的上下文
                         .param("TOP_K", 10)) //取对应的条数
                 //.advisors(new QuestionAnswerAdvisor(loveAppVectorStore)) //应用RAG知识库问答
-                .advisors(loveAppRagCloudAdvisorConfig) //应用增强检索服务（云知识库服务）
+                .advisors(loveAppRagCloudAdvisor) //应用增强检索服务（云知识库服务）
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText(); //chatResponse.getMetadata() 可以获取token消耗量等信息
