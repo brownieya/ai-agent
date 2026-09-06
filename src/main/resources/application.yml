@@ -3,6 +3,18 @@ spring:
     name: brownie-ai-agent
   profiles:
     active: local
+#远程向量数据库链接
+  datasource:
+    url: jdbc:postgresql://pgm-bp1d7por0hv4p8z42o.rwlb.rds.aliyuncs.com:5432/brownie_ai_agent
+    username: my_user
+    password: My123456@
+  ai:
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1024
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
   # springdoc-openapi??????
 server:
   port: 8123
