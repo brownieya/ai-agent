@@ -20,6 +20,7 @@ public class LoveAppVetorStroeConfig {
     @Resource
     private LoveAppDocumentLoader loveAppDocumentLoader;
 
+    //把读取的文档通过EmbeddingModel转换成向量然后保存
     @Bean
     VectorStore loveAppVectorStore(EmbeddingModel dashscopeEmbeddingModel) {
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel).build();
