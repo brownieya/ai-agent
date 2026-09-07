@@ -20,11 +20,22 @@ public class LoveAppVetorStroeConfig {
     @Resource
     private LoveAppDocumentLoader loveAppDocumentLoader;
 
+    @Resource
+    private MyTokenTextSplitter myTokenTextSplitter;
+
+    @Resource
+    private MyKeywordEnricher myKeywordEnricher;
+
     @Bean
     VectorStore loveAppVectorStore(EmbeddingModel dashscopeEmbeddingModel) {
         SimpleVectorStore simpleVectorStore = SimpleVectorStore.builder(dashscopeEmbeddingModel).build();
+        //加载文档
         List<Document> documentList = loveAppDocumentLoader.loadMarkdowns();
-        simpleVectorStore.add(documentList);
+        //使用切词器切文档
+        //List<Document> documents = myTokenTextSplitter.splitCustomized(documentList);
+        //用AI自动补充关键词元信息
+        List<Document> documents = myKeywordEnricher.enrichDocuments(documentList);
+        simpleVectorStore.add(documents);
         return simpleVectorStore;
     };
 }
