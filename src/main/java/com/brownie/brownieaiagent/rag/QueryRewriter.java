@@ -1,4 +1,4 @@
-package com.brownie.brownieaiagent.demo.rag;
+package com.brownie.brownieaiagent.rag;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;

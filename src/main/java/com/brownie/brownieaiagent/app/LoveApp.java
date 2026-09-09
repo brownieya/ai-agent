@@ -3,6 +3,7 @@ package com.brownie.brownieaiagent.app;
 import com.brownie.brownieaiagent.advisor.MyLoggerAdvisor;
 import com.brownie.brownieaiagent.advisor.ReReadingAdvisor;
 import com.brownie.brownieaiagent.chatmemory.FileBaseChatMemoryRepository;
+import com.brownie.brownieaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -132,10 +133,15 @@ public class LoveApp {
     @Resource
     private VectorStore pgVectorVectorStore;
 
+    @Resource
+    private QueryRewriter queryRewriter;
+
     public String doCHatWithRag(String message,String chatId) {
+        //调用查询重写
+        String rewriteMsg = queryRewriter.doQueryRewrite(message);
         ChatResponse chatResponse = chatClient
                 .prompt()
-                .user(message)
+                .user(rewriteMsg) //使用改写后的查询
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId) //取当前id的上下文
                         .param("TOP_K", 10)) //取对应的条数
                 //.advisors(new QuestionAnswerAdvisor(loveAppVectorStore)) //应用RAG知识库问答
