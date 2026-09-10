@@ -3,6 +3,7 @@ package com.brownie.brownieaiagent.app;
 import com.brownie.brownieaiagent.advisor.MyLoggerAdvisor;
 import com.brownie.brownieaiagent.advisor.ReReadingAdvisor;
 import com.brownie.brownieaiagent.chatmemory.FileBaseChatMemoryRepository;
+import com.brownie.brownieaiagent.rag.LoveAppRagCustomAdvisorFactory;
 import com.brownie.brownieaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -146,7 +147,8 @@ public class LoveApp {
                         .param("TOP_K", 10)) //取对应的条数
                 //.advisors(new QuestionAnswerAdvisor(loveAppVectorStore)) //应用RAG知识库问答
                 //.advisors(loveAppRagCloudAdvisor) //应用增强检索服务（云知识库服务）
-                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore)) //应用RAG检索增强服务（PgVector向量存储）
+//                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore)) //应用RAG检索增强服务（PgVector向量存储）
+                .advisors(LoveAppRagCustomAdvisorFactory.createLoveAppRagCustomAdvisor(loveAppVectorStore,"单身"))
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText(); //chatResponse.getMetadata() 可以获取token消耗量等信息
