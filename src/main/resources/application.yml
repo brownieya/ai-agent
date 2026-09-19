@@ -6,8 +6,8 @@ spring:
 #远程向量数据库链接
   datasource:
     url: jdbc:postgresql://pgm-bp1d7por0hv4p8z42o.rwlb.rds.aliyuncs.com:5432/brownie_ai_agent
-    username: my_user
-    password: My123456@
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
   ai:
     vectorstore:
       pgvector:

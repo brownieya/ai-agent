@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: brownie-ai-agent
+  datasource:
+    username: your-db-username
+    password: your-db-password
+  ai:
+    dashscope:
+      api-key: your-dashscope-api-key
+      chat:
+        options:
+          model: qwen-plus
+
+# 使用说明：
+# 1. 复制本文件为 application-local.yml（该文件已在 .gitignore 中，不会被提交）
+# 2. 填入你自己的真实密钥/密码
+# 3. 不要修改本 .example 文件中的占位符为真实密钥
