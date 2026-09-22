@@ -5,7 +5,7 @@ spring:
     active: local
 #远程向量数据库链接
   datasource:
-    url: jdbc:postgresql://pgm-bp1d7por0hv4p8z42o.rwlb.rds.aliyuncs.com:5432/brownie_ai_agent
+    url: jdbc:postgresql://localhost:5432/brownie_ai_agent
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
   ai:
