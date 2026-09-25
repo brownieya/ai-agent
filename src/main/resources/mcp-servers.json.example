@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "amap": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "amap-mcp-server.jar"
+      ],
+      "env": {
+        "AMAP_API_KEY": "your-amap-api-key"
+      }
+    }
+  }
+}
