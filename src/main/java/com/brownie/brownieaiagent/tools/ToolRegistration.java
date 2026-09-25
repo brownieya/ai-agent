@@ -2,7 +2,8 @@ package com.brownie.brownieaiagent.tools;
 
 
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.ToolCallbacks;
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,13 +25,16 @@ public class ToolRegistration {
         ResourceDownloadTool resourceDownloadTool = new ResourceDownloadTool();
         TerminalOperationTool terminalOperationTool = new TerminalOperationTool();
         PDFGenerationTool pdfGenerationTool = new PDFGenerationTool();
-        return ToolCallbacks.from(
-            fileOperationTool,
-            webSearchTool,
-            webScrapingTool,
-            resourceDownloadTool,
-            terminalOperationTool,
-            pdfGenerationTool
-        );
+        ToolCallbackProvider toolCallbackProvider = MethodToolCallbackProvider.builder()
+            .toolObjects(
+                fileOperationTool,
+                webSearchTool,
+                webScrapingTool,
+                resourceDownloadTool,
+                terminalOperationTool,
+                pdfGenerationTool
+            )
+            .build();
+        return toolCallbackProvider.getToolCallbacks();
     }
 }
