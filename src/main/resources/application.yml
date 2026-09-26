@@ -17,6 +17,12 @@ spring:
         max-document-batch-size: 10000 # Optional: Maximum number of documents per batch
     mcp:
       client:
+        # MCP 客户端初始化握手超时时间。默认仅 20s，若 mcp-servers.json 里配置的服务器是通过
+        # npx 首次冷启动（需要联网下载安装依赖包），很容易超过默认值导致
+        # "Client failed to initialize by explicit API call" / TimeoutException。
+        # 建议本地先手动执行一次对应命令把依赖装好（或改用全局安装后的可执行文件路径），
+        # 这里同时放宽超时时间作为兜底。
+        request-timeout: 60s
         stdio:
           servers-configuration: classpath:mcp-servers.json
   # springdoc-openapi??????

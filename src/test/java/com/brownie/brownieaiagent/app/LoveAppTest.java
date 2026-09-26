@@ -76,4 +76,11 @@ class LoveAppTest {
         Assertions.assertNotNull(answer);
     }
 
+    @Test
+    void doChatWithMcp() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "我在沈杜公路地铁站，请为我找一家在附近好吃的川菜馆";
+        String answer = loveApp.doChatWithMcp(message, chatId);
+        Assertions.assertNotNull(answer);
+    }
 }

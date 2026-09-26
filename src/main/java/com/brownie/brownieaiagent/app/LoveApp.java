@@ -19,6 +19,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
 
@@ -166,6 +167,27 @@ public class LoveApp {
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId)
                         .param("TOP_K", 10))
                 .toolCallbacks(allTools)
+                .call()
+                .chatResponse();
+        String content = response.getResult().getOutput().getText();
+        log.info("content: {}", content);
+        return content;
+    }
+
+    /**
+     * 调用Mcp 服务
+     * 写配置文件，项目启动的时候，springAI会将启动的Mcp自动整合到toolCallbackProvider
+     */
+    @Resource
+    private ToolCallbackProvider toolCallbackProvider;
+
+    public String doChatWithMcp(String message, String chatId) {
+        ChatResponse response = chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId)
+                        .param("TOP_K", 10))
+                .toolCallbacks(toolCallbackProvider)
                 .call()
                 .chatResponse();
         String content = response.getResult().getOutput().getText();

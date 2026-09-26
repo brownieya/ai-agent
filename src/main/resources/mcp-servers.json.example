@@ -1,13 +1,10 @@
 {
   "mcpServers": {
-    "amap": {
-      "command": "java",
-      "args": [
-        "-jar",
-        "amap-mcp-server.jar"
-      ],
+    "amap-maps": {
+      "command": "npx.cmd",
+      "args": ["-y", "@amap/amap-maps-mcp-server"],
       "env": {
-        "AMAP_API_KEY": "your-amap-api-key"
+        "AMAP_MAPS_API_KEY": "your-amap-api-key"
       }
     }
   }
