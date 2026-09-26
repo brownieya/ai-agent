@@ -78,8 +78,15 @@ class LoveAppTest {
 
     @Test
     void doChatWithMcp() {
+        //测地图MCP
+//        String chatId = UUID.randomUUID().toString();
+//        String message = "我在沈杜公路地铁站，请为我找一家在附近好吃的川菜馆";
+//        String answer = loveApp.doChatWithMcp(message, chatId);
+//        Assertions.assertNotNull(answer);
+
+        //测试图片搜索MCP
         String chatId = UUID.randomUUID().toString();
-        String message = "我在沈杜公路地铁站，请为我找一家在附近好吃的川菜馆";
+        String message = "帮我找两张莲之空的图片";
         String answer = loveApp.doChatWithMcp(message, chatId);
         Assertions.assertNotNull(answer);
     }
