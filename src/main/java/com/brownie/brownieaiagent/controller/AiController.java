@@ -42,7 +42,7 @@ public class AiController {
 
     /**
      * SSE流失调用AI恋爱大师应用
-     * 注解中要配置http请求的响应以流式返回
+     * 注解中要配置http请求的响应以流式返回,下面进行了三种方式的实现，调用的时候选其中一种即可
      * @param message
      * @param chatId
      * @return
