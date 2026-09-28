@@ -11,7 +11,7 @@ public class BrownieManus extends ToolCallAgent {
 
     public BrownieManus(ToolCallback[] allTools, ChatModel dashscopeChatModel) {
         super(allTools);
-        this.setName("yuManus");
+        this.setName("brownieManus");
         String SYSTEM_PROMPT = """  
                 You are BrownieManus, an all-capable AI assistant, aimed at solving any task presented by the user.  
                 You have various tools at your disposal that you can call upon to efficiently complete complex requests.  

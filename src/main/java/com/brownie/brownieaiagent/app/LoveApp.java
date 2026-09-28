@@ -22,6 +22,7 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -102,6 +103,22 @@ public class LoveApp {
         String content = chatResponse.getResult().getOutput().getText(); //chatResponse.getMetadata() 可以获取token消耗量等信息
         log.info("content: {}",content);
         return content;
+    }
+
+    /**
+     * AI 基础对话（支持多轮对话记忆,SSE流式输出）
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public Flux<String> startChatByStream(String message,String chatId) {
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId) //取当前id的上下文
+                        .param("TOP_K", 10)) //取对应的条数
+                .stream()
+                .content();
     }
 
     record LoveReport(String title, List<String> suggestions){}
