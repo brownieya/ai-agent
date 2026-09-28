@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import ChatWindow from '@/components/ChatWindow.vue'
 import { connectLoveAppChat } from '@/api/chat'
 import { generateId } from '@/utils/uuid'
+import { createTypewriter } from '@/composables/useTypewriter'
 
 // 进入页面后自动生成一个聊天室 id，用于区分不同的会话
 const chatId = ref('')
@@ -10,6 +11,8 @@ const messages = ref([])
 const pending = ref(false)
 const connectionState = ref('idle') // idle | connecting | streaming | error
 let activeConnection = null
+let activeTypewriter = null
+let activeAiMessage = null
 
 const statusText = computed(() => {
   switch (connectionState.value) {
@@ -30,10 +33,22 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   activeConnection?.close()
+  activeTypewriter?.stop()
 })
+
+/** 如果上一轮回复还在“打字”中就被新消息打断，直接补全，避免残留半截文字 */
+function finalizeActiveMessage() {
+  if (activeAiMessage && activeAiMessage.status === 'streaming') {
+    activeAiMessage.status = 'done'
+  }
+  activeTypewriter?.completeNow()
+  activeTypewriter = null
+  activeAiMessage = null
+}
 
 function handleSend(text) {
   activeConnection?.close()
+  finalizeActiveMessage()
 
   messages.value.push({
     id: generateId(),
@@ -49,6 +64,11 @@ function handleSend(text) {
     status: 'streaming',
   }
   messages.value.push(aiMessage)
+  activeAiMessage = aiMessage
+
+  // 打字机效果：SSE 收到多少字都先攒起来，由 typewriter 按固定节奏“打”出来
+  const typewriter = createTypewriter(aiMessage)
+  activeTypewriter = typewriter
 
   pending.value = true
   connectionState.value = 'connecting'
@@ -58,18 +78,18 @@ function handleSend(text) {
       connectionState.value = 'streaming'
     },
     onMessage: (chunk) => {
-      aiMessage.content += chunk
+      typewriter.push(chunk)
     },
     onDone: () => {
-      aiMessage.status = 'done'
-      pending.value = false
-      connectionState.value = 'idle'
+      typewriter.finish(() => {
+        aiMessage.status = 'done'
+        pending.value = false
+        connectionState.value = 'idle'
+      })
     },
     onError: () => {
+      typewriter.setImmediate('连接失败了，请确认后端服务（http://localhost:8123）已启动后重试。')
       aiMessage.status = 'error'
-      if (!aiMessage.content) {
-        aiMessage.content = '连接失败了，请确认后端服务（http://localhost:8123）已启动后重试。'
-      }
       pending.value = false
       connectionState.value = 'error'
     },

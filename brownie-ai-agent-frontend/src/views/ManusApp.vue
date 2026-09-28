@@ -4,12 +4,14 @@ import ChatWindow from '@/components/ChatWindow.vue'
 import { connectManusChat } from '@/api/chat'
 import { generateId } from '@/utils/uuid'
 import { parseManusChunk } from '@/utils/format'
+import { createTypewriter } from '@/composables/useTypewriter'
 
 const messages = ref([])
 const pending = ref(false)
 const connectionState = ref('idle') // idle | connecting | streaming | error
 let activeConnection = null
 let thinkingId = null
+let stepTypewriters = [] // 当前这一轮里，还在“打字”的所有步骤气泡的 typewriter
 
 const statusText = computed(() => {
   switch (connectionState.value) {
@@ -26,6 +28,7 @@ const statusText = computed(() => {
 
 onBeforeUnmount(() => {
   activeConnection?.close()
+  stepTypewriters.forEach((tw) => tw.stop())
 })
 
 function variantOf(type) {
@@ -40,8 +43,15 @@ function removeThinkingPlaceholder() {
   thinkingId = null
 }
 
+/** 打断上一轮还没打完字的步骤气泡，直接补全，避免残留半截文字 */
+function finalizePendingSteps() {
+  stepTypewriters.forEach((tw) => tw.completeNow())
+  stepTypewriters = []
+}
+
 function handleSend(text) {
   activeConnection?.close()
+  finalizePendingSteps()
 
   messages.value.push({
     id: generateId(),
@@ -69,13 +79,24 @@ function handleSend(text) {
     onMessage: (raw) => {
       removeThinkingPlaceholder()
       const parsed = parseManusChunk(raw)
-      messages.value.push({
+
+      const stepMessage = {
         id: generateId(),
         role: 'ai',
-        content: parsed.content,
-        status: 'done',
+        content: '',
+        status: 'streaming',
         stepLabel: parsed.label,
         variant: variantOf(parsed.type),
+      }
+      messages.value.push(stepMessage)
+
+      // 每一步的完整文本一次性到达，用打字机效果把它“打”出来，而不是瞬间显示
+      const typewriter = createTypewriter(stepMessage)
+      stepTypewriters.push(typewriter)
+      typewriter.push(parsed.content)
+      typewriter.finish(() => {
+        stepMessage.status = 'done'
+        stepTypewriters = stepTypewriters.filter((tw) => tw !== typewriter)
       })
     },
     onDone: () => {
